@@ -8,34 +8,42 @@ WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Vampire Door Game")
 
-# Font
 font = pygame.font.SysFont(None, 32)
 
-# Door
-door_img = pygame.Surface((150, 250))
-door_img.fill((139, 69, 19))  # Brown color
-door_rect = door_img.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+# Door properties
+door_rect = pygame.Rect(WIDTH // 2 - 75, HEIGHT // 2 - 125, 150, 250)
+window_rect = pygame.Rect(door_rect.centerx - 32, door_rect.y + 30, 64, 64)
 
-# Game state
+# Dialogue
+dialogue_box = pygame.Rect(100, 450, 600, 100)
+dialogue_text = ""
 knock_active = True
-interaction_text = ""
+stranger_visible = False
+
+# Stranger face colors (randomized later)
+STRANGER_FACE_COLOR = (220, 50, 50)  # Red face as placeholder
 
 clock = pygame.time.Clock()
 
 while True:
-    screen.fill((30, 30, 30))  # Background color
+    screen.fill((30, 30, 30))  # Background
 
     # Draw door
-    screen.blit(door_img, door_rect)
+    pygame.draw.rect(screen, (139, 69, 19), door_rect)  # Main door
+    pygame.draw.rect(screen, (80, 80, 80), window_rect)  # Window
 
-    # Draw prompt
+    # Draw face in window
+    if stranger_visible:
+        pygame.draw.ellipse(screen, STRANGER_FACE_COLOR, window_rect.inflate(-10, -10))
+
+    # Dialogue box
+    pygame.draw.rect(screen, (10, 10, 10), dialogue_box)
+    pygame.draw.rect(screen, (255, 255, 255), dialogue_box, 2)
     if knock_active:
-        prompt = font.render("There is a knock at the door. Click to respond.", True, (255, 255, 255))
-        screen.blit(prompt, (WIDTH // 2 - prompt.get_width() // 2, 50))
-
-    if interaction_text:
-        msg = font.render(interaction_text, True, (255, 255, 255))
-        screen.blit(msg, (WIDTH // 2 - msg.get_width() // 2, 100))
+        dialogue_text = "There is a knock at the door. Click to respond."
+    if dialogue_text:
+        text_surface = font.render(dialogue_text, True, (255, 255, 255))
+        screen.blit(text_surface, (dialogue_box.x + 20, dialogue_box.y + 30))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -44,8 +52,9 @@ while True:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if door_rect.collidepoint(event.pos) and knock_active:
-                interaction_text = "You hear a voice... Do you let them in?"
-                knock_active = False  # remove knock until next round
+                knock_active = False
+                stranger_visible = True
+                dialogue_text = "Stranger: Good evening... may I come in?"
 
     pygame.display.flip()
     clock.tick(60)
