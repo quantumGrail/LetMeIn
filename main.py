@@ -30,6 +30,14 @@ stranger_profile = {
     "eye_shape": "slit",    # or "round"
 }
 
+questions_asked = 0
+max_questions = 3
+dialogue_responses = [
+    "I just need a place to stay.",
+    "I was walking all night.",
+    "Is it so wrong to knock politely?"
+]
+
 # Stranger face colors (randomized later)
 STRANGER_FACE_COLOR = (220, 50, 50)  # Red face as placeholder
 
@@ -91,6 +99,13 @@ while True:
         text_surface = font.render(dialogue_text, True, (255, 255, 255))
         screen.blit(text_surface, (dialogue_box.x + 20, dialogue_box.y + 30))
 
+    # Ask a Question Button
+    question_button = pygame.Rect(300, 560, 200, 30)
+    pygame.draw.rect(screen, (60, 60, 60), question_button)
+    pygame.draw.rect(screen, (255, 255, 255), question_button, 1)
+    button_label = font.render("Ask a Question", True, (255, 255, 255))
+    screen.blit(button_label, (question_button.x + 25, question_button.y + 5))
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -101,6 +116,17 @@ while True:
                 knock_active = False
                 stranger_visible = True
                 dialogue_text = "Stranger: Good evening... may I come in?"
+                questions_asked = 0  # reset for new encounter
+
+            elif stranger_visible and question_button.collidepoint(event.pos):
+                if questions_asked < max_questions:
+                    dialogue_text = "Stranger: " + dialogue_responses[questions_asked]
+                    questions_asked += 1
+                else:
+                    dialogue_text = "Stranger: I don’t have time for this. Goodbye."
+                    stranger_visible = False
+                    knock_active = True
+                    questions_asked = 0
 
     pygame.display.flip()
     clock.tick(60)
